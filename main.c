@@ -21,10 +21,8 @@ int main(int argc, char* argv[])
 	
 	Ps = (struct process *)malloc(N * sizeof(struct process));
 
-	for (int i = 0; i < N; i++) {
-		scanf("%s%d%d", Ps[i].name,
-			&Ps[i].t_ready, &Ps[i].t_exec);
-	}
+	for (int i = 0; i < N; i++)
+		scanf("%s%d%d", Ps[i].name,&Ps[i].t_ready, &Ps[i].t_exec);
 
 	if (strcmp(S, "FIFO") == 0) {
 		policy = FIFO;

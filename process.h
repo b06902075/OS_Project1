@@ -12,6 +12,7 @@ struct process {
 	char name[32];
 	int t_ready;
 	int t_exec;
+	int t_RR;
 	pid_t pid;
 };
 

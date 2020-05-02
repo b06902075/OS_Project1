@@ -34,20 +34,13 @@ int next_process(struct process *Ps, int N, int policy)
 		
 		break;
 	case RR:
-		if (running_P == -1) {
-			for (int i = 0; i < N; i++) {
-				if (Ps[i].pid != -1 && Ps[i].t_exec > 0){
-					next_P = i;
-					break;
-				}
+		if (running_P != -1 && (t_now - t_last) % 500 != 0) next_P = running_P;
+		else {
+			for(int i = 0; i < N; i++){
+				if(Ps[i].pid == -1 || Ps[i].t_exec == 0) continue;
+				if(next_P == -1 || Ps[i].t_RR < Ps[next_P].t_RR) next_P = i;
 			}
 		}
-		else if ((t_now - t_last) % 500 == 0)  {
-			next_P = (running_P + 1) % N;
-			while (Ps[next_P].pid == -1 || Ps[next_P].t_exec == 0)
-				next_P = (next_P + 1) % N;
-		}
-		else next_P = running_P;
 		
 		break;
 	
@@ -67,7 +60,10 @@ int scheduling(struct process *Ps, int N, int policy)
 {
 	qsort(Ps, N, sizeof(struct process), cmp);
 
-	for (int i = 0; i < N; i++) Ps[i].pid = -1;
+	for (int i = 0; i < N; i++) {
+		Ps[i].pid = -1;
+		Ps[i].t_RR = Ps[i].t_ready;
+	}
 
 	process_cpu(getpid(), PARENT_CPU);
 	process_run(getpid());
@@ -105,8 +101,11 @@ int scheduling(struct process *Ps, int N, int policy)
 		}
 
 		UNIT_TIME();
-		if (running_P != -1) Ps[running_P].t_exec--;
 		t_now++;
+		if (running_P != -1) {
+			Ps[running_P].t_exec--;
+			Ps[running_P].t_RR = t_now;
+		}
 	}
 
 	return 0;
